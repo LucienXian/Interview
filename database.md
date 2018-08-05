@@ -97,3 +97,7 @@ InnoDB利用MVVC解决幻读。通过给每个读取事务加一个版本号，�
    1. 支持的数据类型不同；
    2. 内存管理机制不同，redis并不是所有数据都在内存中的，物理内存用完时redis可以将一些很久没用的value交换到磁盘中。memcached的内存管理机制是slab allocation，而redis是维持一个数组；
    3. redis支持数据持久化；
+10. MyISAM与InnoDB的区别
+
+* Innodb支持事务处理，外键和行级锁，MyISAM不支持
+* Innodb不保存表的具体函数，在计算一个表的行数时需要扫描整个表
