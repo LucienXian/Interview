@@ -6,6 +6,13 @@
 4. UDP应用：DNS，即时通讯；
 5. UDP头部：8bytes，源端口和目的端口，长度和校验和
 
+* udp调用connect有什么作用
+
+内核仅仅把对端ip&port记录下来；UDP多次调用connect有两种用途:1,指定一个新的ip&port连结. 2,断开和之前的ip&port的连结；断开连接,需要将connect第二个参数中的sin_family设置成 AF_UNSPEC即可
+
+* tcp时序图、状态图
+
+https://blog.csdn.net/abc_ii/article/details/18603469
 
 
 * TCP三次握手
@@ -145,6 +152,14 @@ epoll：epoll同样只告知哪些文件描述符准备就绪了，但我们调�
 
 * epoll中LT和ET的使用场景
 
+LT模式：LT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的。只要缓冲内容不为空，LT模式返回读就绪；只要缓冲区还不满，LT模式会返回写就绪；
+
+ET模式：ET (edge-triggered)是高速工作方式，只支持no-block socket。在这种模式下，当描述符从未就绪变为就绪时，内核通过epoll告诉你。当缓冲区由不可读变为可读的时候，当有新数据到达时，当缓冲区有数据可读，且应用进程对相应的描述符进行EPOLL_CTL_MOD 修改EPOLLIN事件时，返回
+读就绪；当缓冲区由不可写变为可写时，当有旧数据被发送走，当缓冲区有空间可写，且应用进程对相应的描述符进行EPOLL_CTL_MOD 修改EPOLLOUT事件时，返回
+写就绪。
+
+ET模式的加速效用仍需要更多的benchmark确认
+
 用ET，可以便利地处理EPOLLOUT事件，因为EPOLLOUT触发后会一直读取数据直到返回EAGAIN为止，避免了打开关闭EPOLLOUT，提高了效率。而在处理并发大流量时，LT模式会会不断开关EPOLLOUT，影响性能。
 
 
@@ -154,13 +169,6 @@ epoll：epoll同样只告知哪些文件描述符准备就绪了，但我们调�
 1. 当缓冲区从不可写到可写，就会触发EPOLLOUT事件；
 2. 只有当对端有数据写入时才会触发EPOLLINT事件；
 
-
-
-
-
-* UDP可以connect吗
-
-可以，不像TCP那样进行三次握手，只是记录下对端的IP和port。
 
 
 
